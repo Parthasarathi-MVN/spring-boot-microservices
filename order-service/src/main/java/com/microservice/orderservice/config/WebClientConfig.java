@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
+//    This bean is being used in Service with same variable name as this method name
     @Bean
     @LoadBalanced
     public WebClient.Builder webClientBuilder()

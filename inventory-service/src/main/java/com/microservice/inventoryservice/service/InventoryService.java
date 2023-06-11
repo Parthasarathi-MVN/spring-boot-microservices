@@ -1,19 +1,19 @@
 package com.microservice.inventoryservice.service;
 
 import com.microservice.inventoryservice.dto.InventoryResponse;
-import com.microservice.inventoryservice.model.Inventory;
 import com.microservice.inventoryservice.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class InventoryService {
 
-    private final InventoryRepository inventoryRepository;
+    @Autowired
+    private InventoryRepository inventoryRepository;
 
     @Transactional(readOnly = true)
     public List<InventoryResponse> isInStock(List<String> skuCode) {
