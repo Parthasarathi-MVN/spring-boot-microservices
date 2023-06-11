@@ -7,6 +7,7 @@ import com.microservice.orderservice.model.Order;
 import com.microservice.orderservice.model.OrderLineItems;
 import com.microservice.orderservice.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -22,7 +23,7 @@ public class OrderService {
 
     //the instance name is similar to that of bean created in WebClientConfig
     @Autowired
-    private WebClient webClient;
+    private WebClient.Builder webClientBuilder;
 
     public void placeOrder(OrderRequest orderRequest) throws IllegalAccessException {
         Order order = new Order();
@@ -39,8 +40,8 @@ public class OrderService {
 
         //Calling Inventory Service and place order if Product is present in stock
 
-        InventoryResponse inventoryResponseArray[] = webClient.get()
-                .uri("http://localhost:8082/api/inventory",
+        InventoryResponse inventoryResponseArray[] = webClientBuilder.build().get()
+                .uri("http://inventory-service/api/inventory",
                         uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class) // this is to check if we are getting the correct data-type value
