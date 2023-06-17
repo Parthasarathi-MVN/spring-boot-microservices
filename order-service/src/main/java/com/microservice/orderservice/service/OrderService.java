@@ -1,11 +1,14 @@
 package com.microservice.orderservice.service;
 
+import brave.Span;
+import brave.Tracer;
 import com.microservice.orderservice.dto.InventoryResponse;
 import com.microservice.orderservice.dto.OrderLineItemsDto;
 import com.microservice.orderservice.dto.OrderRequest;
 import com.microservice.orderservice.model.Order;
 import com.microservice.orderservice.model.OrderLineItems;
 import com.microservice.orderservice.repository.OrderRepository;
+import org.aspectj.weaver.tools.Trace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,10 @@ public class OrderService {
     @Autowired
     private WebClient.Builder webClientBuilder;
 
+    private Tracer tracer;
+    public OrderService() {
+    }
+
     public void placeOrder(OrderRequest orderRequest) throws IllegalAccessException {
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
@@ -37,6 +44,9 @@ public class OrderService {
         List<String> skuCodes = order.getOrderLineItemsList().stream()
                 .map(orderLineItems1 -> orderLineItems1.getSkuCode()).toList();
 
+
+        Span inventoryServiceLookup = tracer.nextSpan().name("InventoryServiceLookup");
+        tracer.withSpanInScope(inventoryServiceLookup.start());
 
         //Calling Inventory Service and place order if Product is present in stock
 
