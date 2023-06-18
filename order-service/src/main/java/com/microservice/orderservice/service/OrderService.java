@@ -5,12 +5,14 @@ import brave.Tracer;
 import com.microservice.orderservice.dto.InventoryResponse;
 import com.microservice.orderservice.dto.OrderLineItemsDto;
 import com.microservice.orderservice.dto.OrderRequest;
+import com.microservice.orderservice.event.OrderPlacedEvent;
 import com.microservice.orderservice.model.Order;
 import com.microservice.orderservice.model.OrderLineItems;
 import com.microservice.orderservice.repository.OrderRepository;
 import org.aspectj.weaver.tools.Trace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -29,6 +31,8 @@ public class OrderService {
     private WebClient.Builder webClientBuilder;
 
     private Tracer tracer;
+
+    private KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
     public OrderService() {
     }
 
@@ -62,6 +66,9 @@ public class OrderService {
         if(allProductsInStock)
         {
             orderRepository.save(order);
+
+            //this topic name (notificationTopic) we used in Notification Service KafkaListener Annotation
+            kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
         }
         else {
             throw new IllegalAccessException("Product is not in stock. Please try again later");

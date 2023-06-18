@@ -1,4 +1,4 @@
-package org.microservices.apigateway.config;
+package org.microservice.apigateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
