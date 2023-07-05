@@ -11,9 +11,11 @@ import com.microservice.orderservice.model.OrderLineItems;
 import com.microservice.orderservice.repository.OrderRepository;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.tools.Trace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class OrderService {
 
     @Autowired
@@ -35,6 +38,8 @@ public class OrderService {
     private Tracer tracer;
 
     private KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
+
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private ObservationRegistry observationRegistry;
     public OrderService() {
@@ -71,12 +76,14 @@ public class OrderService {
 
 
             Boolean allProductsInStock = Arrays.stream(inventoryResponseArray).allMatch(inventoryResponse -> inventoryResponse.getIsInStock());
-
+            log.info("all products {}", allProductsInStock);
             if (allProductsInStock) {
                 orderRepository.save(order);
 
+                // publish Order Placed Event
                 //this topic name (notificationTopic) we used in Notification Service KafkaListener Annotation
-                kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
+//                kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
+                applicationEventPublisher.publishEvent(new OrderPlacedEvent(order.getOrderNumber()));
                 return "Order Placed";
             }
             else

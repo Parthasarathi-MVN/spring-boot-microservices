@@ -1,3 +1,10 @@
+**A Brief on what this app does.**
+
+Product Service is used to read, create, update and delete Products
+Inventory Service is used to handle the orders which are requested from Order Service.
+Order Service has a circuit breaker. 
+When an order is placed successfully Order Service creates an Order Placed Event and triggers Notification Service which in turn triggers a notification (in this case it's an email.)
+
 Technologies used : 
 TestContainers
 JIB
@@ -8,6 +15,6 @@ Some brief about Testcontainers. Testcontainers is an easy solution to run Integ
 
 This microservices project uses the following Architecture
 
-![Architecture](assets/diagram.drawio.svg)
+![Architecture](assets/final.drawio.svg)
 
 Coming soon complete documentation.
